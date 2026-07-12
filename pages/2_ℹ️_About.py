@@ -20,6 +20,15 @@ st.title("ℹ️ About This App")
 st.write("""
 This is an AI Chatbot built with **Streamlit** and **OpenAI**.
 
+### Project Scope
+- 📄 **Document AI Assistant**
+
+### Objectives
+- 🎯 **To provide employees with information regarding Terms and Conditions of No Pay Leave**
+
+### Data Source
+- 📚 **Terms and Conditions document on No Pay Leave**
+
 ### Features
 - 💬 **Conversational AI** — Chat naturally with GPT-4o-mini
 - 🔒 **Password Protected** — Secure access with a shared password
