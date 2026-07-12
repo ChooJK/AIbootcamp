@@ -21,4 +21,5 @@ Welcome to the AI Chatbot! Navigate using the **sidebar** to explore:
 
 - 💬 **Chatbot** — Have a conversation with the AI assistant
 - ℹ️ **About** — Learn more about this app
+- 📘 **Methodology** — Data flow and implementation details
 """)
