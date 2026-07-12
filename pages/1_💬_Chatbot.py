@@ -16,6 +16,61 @@ except ImportError:
     RecursiveCharacterTextSplitter = None
 
 
+def load_and_split(uploaded_file):
+    """Load a PDF from a Streamlit uploaded file and return text chunks."""
+    if uploaded_file is None:
+        return []
+
+    if any(obj is None for obj in [PyPDFLoader, RecursiveCharacterTextSplitter]):
+        raise ImportError(
+            "LangChain dependencies are not installed. Please install the packages from requirements.txt."
+        )
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        temp_file.write(uploaded_file.getvalue())
+        temp_path = temp_file.name
+
+    try:
+        loader = PyPDFLoader(temp_path)
+        documents = loader.load()
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+        return text_splitter.split_documents(documents)
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
+@st.cache_resource
+def build_vectorstore(_chunks):
+    """Create a Chroma vector store from LangChain document chunks."""
+    if not _chunks:
+        return None
+
+    api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key)
+    return Chroma.from_documents(documents=_chunks, embedding=embeddings)
+
+
+def retrieve_context(vectorstore, query, k=4):
+    """Retrieve and combine the most relevant document chunks for a query."""
+    retriever = vectorstore.as_retriever(search_kwargs={"k": k})
+    documents = retriever.invoke(query)
+    return "\n\n---\n\n".join(doc.page_content for doc in documents)
+
+
+def build_rag_system_prompt(context):
+    """Create a system prompt that instructs the model to answer only from the provided context."""
+    return (
+        "You are a helpful assistant. Answer ONLY from the provided context. "
+        "If the answer is not present in the context, say: "
+        '"I could\'t find that information in the uploaded document."\n\n'
+        f"Context:\n{context}"
+    )
+
+
+system_prompt_no_doc = "You are a helpful assistant."
+
+
 def build_rag_vector_store(uploaded_files):
     """Build a Chroma vector store from uploaded PDF files."""
     if not uploaded_files:
@@ -85,8 +140,15 @@ with st.sidebar:
 
     if uploaded_document is not None:
         st.success(f"Loaded: {uploaded_document.name}")
+        chunks = load_and_split(uploaded_document)
+        vectorstore = build_vectorstore(chunks)
+        st.session_state.vectorstore = vectorstore
+        st.session_state.chunks_count = len(chunks)
+        st.success(f"Ready! Indexed {len(chunks)} chunks.")
     else:
         st.info("Upload a PDF to enable document Q&A.")
+
+    k_value = st.slider("Chunks to retrieve (k)", min_value=1, max_value=10, value=4)
 
     st.header("⚙️ Settings")
     system_prompt = st.text_area(
