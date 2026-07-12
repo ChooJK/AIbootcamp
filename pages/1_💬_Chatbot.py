@@ -185,22 +185,17 @@ if user_input := st.chat_input("Type your message here..."):
         st.write(user_input)
 
     with st.chat_message("assistant"):
-        vector_store = st.session_state.get("rag_vector_store")
-        augmented_prompt = system_prompt
-
-        if vector_store is not None:
+        if "vectorstore" in st.session_state:
             try:
-                retrieved_docs = vector_store.similarity_search(user_input, k=4)
-                if retrieved_docs:
-                    context_text = "\n\n".join(doc.page_content for doc in retrieved_docs)
-                    augmented_prompt = (
-                        f"{system_prompt}\n\n"
-                        f"Use the following context when it is relevant:\n{context_text}"
-                    )
+                context = retrieve_context(st.session_state.vectorstore, user_input, k_value)
+                system_message = build_rag_system_prompt(context)
             except Exception as exc:
                 st.warning(f"Retrieval failed: {exc}")
+                system_message = system_prompt_no_doc
+        else:
+            system_message = system_prompt_no_doc
 
-        full_messages = [{"role": "system", "content": augmented_prompt}] + st.session_state.messages
+        full_messages = [{"role": "system", "content": system_message}] + st.session_state.messages
         response = st.write_stream(get_completion_stream(full_messages))
 
     st.session_state.messages.append({"role": "assistant", "content": response})
