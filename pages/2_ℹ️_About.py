@@ -23,11 +23,16 @@ This is an AI Chatbot built with **Streamlit** and **OpenAI**.
 ### Project Scope
 - 📄 **Document AI Assistant**
 
-### Objectives
-- 🎯 **To provide employees with information regarding Terms and Conditions of No Pay Leave**
+### Problem Statement
+Employees struggle to find accurate HR-related information because it is spread across multiple and lengthy documents, as well as web pages. This often results in inconsistent answers and wasted time searching for the right resources. As a result, HR team spends significant time responding to questions where the answers can be found these documents and web pages instead of focusing on higher-value tasks.
 
-### Data Source
-- 📚 **Terms and Conditions document on No Pay Leave**
+### Solution
+This app is enabled with a Retrieval-Augmented Generation (RAG) application that gives employees instant, accurate answers strictly based on the knowledge base. When the knowledge base is added, the sources are automatically chunked and embedded into a vector store. When an employee prompts a question from this knowledge base, the system:
+
+- Converts the question into a semantic embedding
+- Retrieves the most relevant passages from the vector store
+- Passes those passages to an LLM as context
+- Returns an answer grounded only in the retrieved content
 
 ### Features
 - 💬 **Conversational AI** — Chat naturally with GPT-4o-mini
