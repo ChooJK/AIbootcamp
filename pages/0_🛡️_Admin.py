@@ -15,7 +15,7 @@ st.set_page_config(
 def unlock_admin_page():
     """Return True if the admin password is correct."""
     entered_password = str(st.session_state.get("admin_password", "")).strip()
-    expected_password = "admin123"
+    expected_password = "Admin123"
 
     if hmac.compare_digest(entered_password, expected_password):
         st.session_state["admin_password_correct"] = True
