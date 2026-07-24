@@ -157,7 +157,7 @@ else:
     st.title("🛡️ Admin")
 
     with st.form("admin_unlock_form"):
-        admin_password = st.text_input(
+        st.text_input(
             "Admin Password",
             type="password",
             key="admin_password",
