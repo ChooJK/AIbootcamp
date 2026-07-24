@@ -41,8 +41,6 @@ st.title("💬 AI Chatbot")
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    k_value = st.slider("Chunks to retrieve (k)", min_value=1, max_value=10, value=4)
-
     st.header("⚙️ Settings")
     system_prompt = st.text_area(
         "System Prompt",
@@ -80,7 +78,7 @@ if user_input := st.chat_input("Type your message here..."):
     with st.chat_message("assistant"):
         if "vectorstore" in st.session_state:
             try:
-                context = retrieve_context(st.session_state.vectorstore, user_input, k_value)
+                context = retrieve_context(st.session_state.vectorstore, user_input)
                 system_message = build_rag_system_prompt(context)
             except Exception as exc:
                 st.warning(f"Retrieval failed: {exc}")
