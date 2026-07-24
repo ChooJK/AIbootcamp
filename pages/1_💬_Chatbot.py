@@ -41,6 +41,9 @@ st.title("💬 AI Chatbot")
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
+    if not st.session_state.get("vectorstore"):
+        st.info("No knowledge base. Ask an admin to index documents.")
+
     st.header("⚙️ Settings")
     system_prompt = st.text_area(
         "System Prompt",

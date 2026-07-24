@@ -31,10 +31,21 @@ if st.session_state.get("admin_password_correct", False):
     This page is for administrative configuration.
 
     ### Admin Controls
-    - Manage knowledge-base settings
+    - Upload a PDF knowledge base document
     - Configure the RAG source behavior
     - Review administrative details
     """)
+
+    uploaded_document = st.file_uploader(
+        "📄 Upload a Document",
+        type=["pdf"],
+    )
+
+    if uploaded_document is not None:
+        st.session_state["uploaded_document"] = uploaded_document
+        st.success(f"Loaded: {uploaded_document.name}")
+    else:
+        st.info("Upload a PDF to enable document Q&A.")
 else:
     st.title("🛡️ Admin")
 
