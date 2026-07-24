@@ -28,11 +28,12 @@ st.set_page_config(
 
 def unlock_admin_page():
     """Return True if the admin password is correct."""
-    entered_password = st.session_state.get("admin_password", "")
-    expected_password = st.secrets.get("admin_password", "")
+    entered_password = str(st.session_state.get("admin_password", "")).strip()
+    expected_password = str(st.secrets.get("admin_password", "admin123")).strip()
 
     if hmac.compare_digest(entered_password, expected_password):
         st.session_state["admin_password_correct"] = True
+        st.session_state["admin_password"] = ""
         return True
 
     st.session_state["admin_password_correct"] = False
@@ -166,6 +167,7 @@ else:
 
     if submitted:
         if unlock_admin_page():
+            st.session_state["admin_password_correct"] = True
             st.rerun()
         else:
             st.error("😕 Password incorrect")
