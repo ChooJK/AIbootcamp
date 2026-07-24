@@ -26,13 +26,17 @@ st.set_page_config(
 # endregion <--------- Streamlit Page Configuration --------->
 
 
-def admin_password_entered():
-    """Checks whether the entered admin password is correct."""
-    if hmac.compare_digest(st.session_state["admin_password"], st.secrets["admin_password"]):
+def unlock_admin_page():
+    """Return True if the admin password is correct."""
+    entered_password = st.session_state.get("admin_password", "")
+    expected_password = st.secrets.get("admin_password", "")
+
+    if hmac.compare_digest(entered_password, expected_password):
         st.session_state["admin_password_correct"] = True
-        del st.session_state["admin_password"]
-    else:
-        st.session_state["admin_password_correct"] = False
+        return True
+
+    st.session_state["admin_password_correct"] = False
+    return False
 
 
 def load_and_split_pdf(uploaded_file):
@@ -151,12 +155,21 @@ if st.session_state.get("admin_password_correct", False):
             st.caption(f"Active knowledge source: {st.session_state.source_name}")
 else:
     st.title("🛡️ Admin")
-    st.text_input(
-        "Admin Password",
-        type="password",
-        on_change=admin_password_entered,
-        key="admin_password",
-    )
-    if "admin_password_correct" in st.session_state:
-        st.error("😕 Password incorrect")
+
+    with st.form("admin_unlock_form"):
+        admin_password = st.text_input(
+            "Admin Password",
+            type="password",
+            key="admin_password",
+        )
+        submitted = st.form_submit_button("Unlock")
+
+    if submitted:
+        if unlock_admin_page():
+            st.rerun()
+        else:
+            st.error("😕 Password incorrect")
+    else:
+        st.info("Enter the admin password to access this page.")
+
     st.stop()
